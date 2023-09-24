@@ -1,10 +1,13 @@
+
 #include <glad/glad.h>
+#define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include "cubes.h"
 #include "linearAlg.h"
 #include "model.h"
 #include "util.h"
@@ -49,7 +52,7 @@ int main(void) {
 
   glfwMakeContextCurrent(window);
 
-  gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+  gladLoadGLLoader(glfwGetProcAddress);
   // glewInit();
   glfwSwapInterval(1);
 
@@ -73,28 +76,19 @@ int main(void) {
   glGenVertexArrays(1, &VAO);
   glBindVertexArray(VAO);
 
-  model cubeModel = getModel("../res/model/cube.model", 3, 2);
-
-  float *vertices = cubeModel.points;
-  int pointCount = cubeModel.pointCount;
-
   GLuint vertex_buffer;
   glGenBuffers(1, &vertex_buffer);
-  glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(float) * pointCount * 3, &vertices[0],
-               GL_STATIC_DRAW);
 
   GLuint uv_buffer;
   glGenBuffers(1, &uv_buffer);
-  glBindBuffer(GL_ARRAY_BUFFER, uv_buffer);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(float) * pointCount * 2,
-               cubeModel.uvPoints, GL_STATIC_DRAW);
 
-  unsigned char *blockTexture = readBMP("../res/img/default.bmp");
+  unsigned char *blockTexture = readBMP("../res/img/main.bmp");
+
+  int pointCount = genCubes(vertex_buffer, uv_buffer);
 
   GLuint text;
   glBindTexture(GL_TEXTURE_2D, text);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 48, 32, 0, GL_RGB, GL_UNSIGNED_BYTE,
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 512, 512, 0, GL_RGB, GL_UNSIGNED_BYTE,
                blockTexture);
 
   free(blockTexture);
@@ -117,10 +111,10 @@ int main(void) {
     Matrix model = IDENTITY_MATRIX;
 
     Matrix view = IDENTITY_MATRIX;
-    rotateX(&view, i * 69);
-    rotateY(&view, i * 420);
-    rotateZ(&view, i * 360);
-    translate(&view, 0.0, 0.0, -5.0);
+    // rotateX(&view, i * 69);
+     rotateY(&view, i * 420);
+    // rotateZ(&view, i * 360);
+    translate(&view, -25.0, -8.0, -25.0);
 
     Matrix proj = perspective(120.0, ratio, 0.1f, 100.0f);
 
@@ -128,7 +122,7 @@ int main(void) {
     glUniformMatrix4fv(4, 1, GL_FALSE, &view.m[0]);
     glUniformMatrix4fv(5, 1, GL_FALSE, &proj.m[0]);
 
-    GLuint vpos_location = 1; // glGetUniformLocation(program, "vPos");
+    GLuint vpos_location = 1;
     glEnableVertexAttribArray(vpos_location);
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
     glVertexAttribPointer(vpos_location, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);

@@ -32,8 +32,9 @@ float parseFloat(char *strBegin, char *strEnd) {
   return sign * decay * parsedFloat;
 }
 
-model getModel(char *file, int uvWidth, int uvHeight) {
-  char *fileContent = loadFile(file);
+model getModel(char *fileContent, int uvWidth, int uvHeight, int uvX, int uvY,
+               float offX, float offY, float offZ) {
+  // char *fileContent = loadFile(file);
 
   model foundModel = {NULL, 0};
   char *commaLocation = fileContent;
@@ -60,15 +61,23 @@ model getModel(char *file, int uvWidth, int uvHeight) {
 
     foundModel.points[i] = parseFloat(prevCommaLocation, commaLocation);
 
+    if (i % 3 == 0) {
+      foundModel.points[i] += offX;
+    } else if (i % 3 == 1) {
+      foundModel.points[i] += offY;
+    } else {
+      foundModel.points[i] += offZ;
+    }
+
     prevCommaLocation = commaLocation;
   }
 
   for (int i = 0; i < commaCount / 18; i++) {
-    float minX = (i % uvWidth) / ((float)uvWidth);
-    float minZ = (i / uvWidth) / ((float)uvHeight);
+    float minX = (i % uvWidth + uvX) / (UV_SIZE);
+    float minZ = (i / uvWidth + uvY) / (UV_SIZE);
 
-    float maxX = minX + (1.0 / uvWidth);
-    float maxZ = minZ + (1.0 / uvHeight);
+    float maxX = minX + (1.0 / (UV_SIZE));
+    float maxZ = minZ + (1.0 / (UV_SIZE));
 
     foundModel.uvPoints[i * 12 + 0] = minX;
     foundModel.uvPoints[i * 12 + 1] = minZ;

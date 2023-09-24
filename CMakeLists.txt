@@ -25,7 +25,7 @@ set(GLAD_PROFILE "core" CACHE STRING "OpenGL profile")
 set(GLAD_API "gl=" CACHE STRING "API type/version pairs, like \"gl=3.2,gles=\", no version means latest")
 set(GLAD_GENERATOR "c" CACHE STRING "Language to generate the binding for")
 
-add_executable(cgame src/main.c src/util.c src/model.c src/linearAlg.c)
+add_executable(cgame src/main.c src/util.c src/model.c src/linearAlg.c src/cubes.c)
 
 set_property(TARGET cgame PROPERTY C_STANDARD 11)
 
