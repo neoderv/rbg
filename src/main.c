@@ -86,7 +86,7 @@ int main(void) {
 
   int pointCount = genCubes(vertex_buffer, uv_buffer);
 
-  GLuint text;
+  GLuint text = 0;
   glBindTexture(GL_TEXTURE_2D, text);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 512, 512, 0, GL_RGB, GL_UNSIGNED_BYTE,
                blockTexture);
