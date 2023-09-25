@@ -2,12 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-struct model {
-  float *points;
-  float *uvPoints;
-  int pointCount;
-} typedef model;
+#include "types.h"
 
 float parseFloat(char *strBegin, char *strEnd) {
   float decay = 1.0;

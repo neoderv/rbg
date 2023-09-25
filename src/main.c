@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "controls.h"
 #include "cubes.h"
 #include "linearAlg.h"
 #include "model.h"
@@ -96,9 +97,15 @@ int main(void) {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-  double i = 0;
+  glClearColor(170 / 256.0, 220 / 256.0, 230 / 256.0, 1.0);
+
+  controls controls = {.x = 0, .y = 0, .z = 0, .xv = 0, .yv = 0, .zv = 0};
+
+  glfwSetKeyCallback(window,keyCallback);
+
   while (!glfwWindowShouldClose(window)) {
-    i += 0.0001;
+    evalKeys(&controls);
+
     float ratio;
     int width, height;
 
@@ -111,12 +118,9 @@ int main(void) {
     Matrix model = IDENTITY_MATRIX;
 
     Matrix view = IDENTITY_MATRIX;
-    // rotateX(&view, i * 69);
-     rotateY(&view, i * 420);
-    // rotateZ(&view, i * 360);
-    translate(&view, -25.0, -8.0, -25.0);
+    translate(&view, -controls.x, -controls.y - 3, controls.z);
 
-    Matrix proj = perspective(120.0, ratio, 0.1f, 100.0f);
+    Matrix proj = perspective(120.0, ratio, 0.1f, 1000.0f);
 
     glUniformMatrix4fv(3, 1, GL_FALSE, &model.m[0]);
     glUniformMatrix4fv(4, 1, GL_FALSE, &view.m[0]);

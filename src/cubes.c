@@ -13,8 +13,12 @@ int genCubes(GLuint vertex_buffer, GLuint uv_buffer) {
   float *uvPoints = malloc(1024 * 1024 * 1024);
   int pointCount = 0;
 
-  for (int i = 0; i < 10000; i++) {
-    model cubeModel = getModel(fileContent, 6, 1, 0, 1, i % 100 * 2, 0, i / 100 * 2);
+  for (int i = 0; i < 256*256; i++) {
+    int x = i % 256;
+    int z = i / 256;
+    int y = x & z;
+
+    model cubeModel = getModel(fileContent, 6, 1, 0, 1, x*2,y*2,z*2);
 
     memcpy(&points[pointCount*3],cubeModel.points,cubeModel.pointCount * 3 * sizeof(float));
     memcpy(&uvPoints[pointCount*2],cubeModel.uvPoints,cubeModel.pointCount * 2 * sizeof(float));
