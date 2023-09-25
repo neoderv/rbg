@@ -99,12 +99,12 @@ int main(void) {
 
   glClearColor(170 / 256.0, 220 / 256.0, 230 / 256.0, 1.0);
 
-  controls controls = {.x = 0, .y = 0, .z = 0, .xv = 0, .yv = 0, .zv = 0};
+  controls controls = {.x = 0, .y = 0, .z = 0, .xv = 0, .yv = 0, .zv = 0, .xr = 0, .yr = 0};
 
   glfwSetKeyCallback(window,keyCallback);
 
   while (!glfwWindowShouldClose(window)) {
-    evalKeys(&controls);
+    evalKeys(&controls,window);
 
     float ratio;
     int width, height;
@@ -119,6 +119,8 @@ int main(void) {
 
     Matrix view = IDENTITY_MATRIX;
     translate(&view, -controls.x, -controls.y - 3, controls.z);
+    rotateY(&view, controls.xr);
+    rotateX(&view, controls.yr);
 
     Matrix proj = perspective(120.0, ratio, 0.1f, 1000.0f);
 

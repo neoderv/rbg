@@ -6,4 +6,4 @@
 void keyCallback(GLFWwindow *window, int key, int scancode, int action,
                  int mods);
 
-void evalKeys(controls *controls);
+void evalKeys(controls *controls, GLFWwindow *window);
