@@ -1,3 +1,4 @@
+#include "gen.h"
 #include "model.h"
 #include "util.h"
 #include <glad/glad.h>
@@ -13,20 +14,34 @@ int genCubes(GLuint vertex_buffer, GLuint uv_buffer) {
   float *uvPoints = malloc(1024 * 1024 * 1024);
   int pointCount = 0;
 
-  for (int i = 0; i < 256*256; i++) {
+  for (int i = 0; i < 256 * 256; i++) {
     int x = i % 256;
     int z = i / 256;
-    int y = x & z;
+    int y = getCube(x, z, 694200);
 
-    model cubeModel = getModel(fileContent, 6, 1, 0, 1, x*2,y*2,z*2);
+    int yd = getCube(x + 1, z, 694200);
+    int yd2 = getCube(x - 1, z, 694200);
+    int yd3 = getCube(x, z + 1, 694200);
+    int yd4 = getCube(x, z - 1, 694200);
 
-    memcpy(&points[pointCount*3],cubeModel.points,cubeModel.pointCount * 3 * sizeof(float));
-    memcpy(&uvPoints[pointCount*2],cubeModel.uvPoints,cubeModel.pointCount * 2 * sizeof(float));
-    
-    pointCount += cubeModel.pointCount;
+    yd = (yd2 < yd) ? yd2 : yd;
+    yd = (yd3 < yd) ? yd3 : yd;
+    yd = (yd4 < yd) ? yd4 : yd;
+    yd = (y < yd) ? y : yd;
 
-    free(cubeModel.points);
-    free(cubeModel.uvPoints);
+    for (int i = yd-1; i < y; i++) {
+      model cubeModel = getModel(fileContent, 6, 1, 0, 1, x * 2, i * 2, z * 2);
+
+      memcpy(&points[pointCount * 3], cubeModel.points,
+             cubeModel.pointCount * 3 * sizeof(float));
+      memcpy(&uvPoints[pointCount * 2], cubeModel.uvPoints,
+             cubeModel.pointCount * 2 * sizeof(float));
+
+      pointCount += cubeModel.pointCount;
+
+      free(cubeModel.points);
+      free(cubeModel.uvPoints);
+    }
   }
 
   glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);

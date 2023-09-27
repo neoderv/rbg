@@ -1,0 +1,1 @@
+int getCube(int x, int z, int seed);
