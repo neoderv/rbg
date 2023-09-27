@@ -6,23 +6,23 @@
 #include <stdlib.h>
 #include <string.h>
 
-int genCubes(GLuint vertex_buffer, GLuint uv_buffer) {
+int genCubes(GLuint vertex_buffer, GLuint uv_buffer, int* cubes) {
 
   char *fileContent = loadFile("../res/model/cube.model");
 
   float *points = malloc(1024 * 1024 * 1024);
   float *uvPoints = malloc(1024 * 1024 * 1024);
   int pointCount = 0;
-
+  
   for (int i = 0; i < 256 * 256; i++) {
     int x = i % 256;
     int z = i / 256;
-    int y = getCube(x, z, 694200);
+    int y = cubes[i];
 
-    int yd = getCube(x + 1, z, 694200);
-    int yd2 = getCube(x - 1, z, 694200);
-    int yd3 = getCube(x, z + 1, 694200);
-    int yd4 = getCube(x, z - 1, 694200);
+    int yd = (z < 0) ? 0 : cubes[i-256];
+    int yd2 = (z > 255) ? 0 : cubes[i+256];
+    int yd3 = (x < 0) ? 0 : cubes[i-1];
+    int yd4 = (x > 255) ? 0 : cubes[i+1];
 
     yd = (yd2 < yd) ? yd2 : yd;
     yd = (yd3 < yd) ? yd3 : yd;
@@ -30,7 +30,7 @@ int genCubes(GLuint vertex_buffer, GLuint uv_buffer) {
     yd = (y < yd) ? y : yd;
 
     for (int i = yd-1; i < y; i++) {
-      model cubeModel = getModel(fileContent, 6, 1, 0, 1, x * 2, i * 2, z * 2);
+      model cubeModel = getModel(fileContent, 6, 1, 0, 0, x * 2, i * 2, z * 2);
 
       memcpy(&points[pointCount * 3], cubeModel.points,
              cubeModel.pointCount * 3 * sizeof(float));

@@ -85,7 +85,15 @@ int main(void) {
 
   unsigned char *blockTexture = readBMP("../res/img/main.bmp");
 
-  int pointCount = genCubes(vertex_buffer, uv_buffer);
+  int *cubes = malloc(256 * 256 * sizeof(int));
+
+  for (int i = 0; i < 256 * 256; i++) {
+    int x = i % 256;
+    int z = i / 256;
+    cubes[i] = getCube(x, z, 694200);
+  }
+
+  int pointCount = genCubes(vertex_buffer, uv_buffer, cubes);
 
   GLuint text = 0;
   glBindTexture(GL_TEXTURE_2D, text);
@@ -99,12 +107,13 @@ int main(void) {
 
   glClearColor(170 / 256.0, 220 / 256.0, 230 / 256.0, 1.0);
 
-  controls controls = {.x = 0, .y = 256, .z = 0, .xv = 0, .yv = 0, .zv = 0, .xr = 0, .yr = 0};
+  controls controls = {
+      .x = 0, .y = 256, .z = 0, .xv = 0, .yv = 0, .zv = 0, .xr = 0, .yr = 0};
 
-  glfwSetKeyCallback(window,keyCallback);
+  glfwSetKeyCallback(window, keyCallback);
 
   while (!glfwWindowShouldClose(window)) {
-    evalKeys(&controls,window);
+    evalKeys(&controls, window, cubes);
 
     float ratio;
     int width, height;
@@ -118,7 +127,7 @@ int main(void) {
     Matrix model = IDENTITY_MATRIX;
 
     Matrix view = IDENTITY_MATRIX;
-    translate(&view, -controls.x, -controls.y - 2.8, controls.z);
+    translate(&view, -controls.x, -controls.y - 2.8, -controls.z);
     rotateY(&view, controls.xr);
     rotateX(&view, controls.yr);
 

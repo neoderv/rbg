@@ -36,7 +36,7 @@ void keyCallback(GLFWwindow *window, int key, int scancode, int action,
   }
 }
 
-void evalKeys(controls *controls, GLFWwindow *window) {
+void evalKeys(controls *controls, GLFWwindow *window, int *cubes) {
   double xr, yr;
   glfwGetCursorPos(window, &xr, &yr);
 
@@ -65,6 +65,28 @@ void evalKeys(controls *controls, GLFWwindow *window) {
   controls->xv *= 0.9;
   controls->zv *= 0.9;
 
-  controls->z -= sin(controls->xr)*controls->xv - cos(controls->xr)*controls->zv;
-  controls->x += sin(controls->xr)*controls->zv + cos(controls->xr)*controls->xv;
+  int hash = -1;
+  if (controls->x > 0 && controls->x < 512 && controls->z > 0 &&
+      controls->z < 512)
+    hash = (((int)(controls->z / 2 + 0.5)) * 256) + ((int)(controls->x / 2 + 0.5));
+
+  printf("%i\n",((int)(controls->z * 2)));
+
+  if (hash > -1 && hash < 256*256 )
+    hash = cubes[hash] * 2;
+
+  controls->yv -= 0.1;
+
+  controls->z +=
+      sin(controls->xr) * controls->xv - cos(controls->xr) * controls->zv;
+  controls->x +=
+      sin(controls->xr) * controls->zv + cos(controls->xr) * controls->xv;
+
+  controls->y += controls->yv;
+
+  if (controls->y < hash) {
+    printf("oh no!\n");
+    controls->y = hash;
+    controls->yv = 0;
+  }
 }
