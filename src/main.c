@@ -85,12 +85,16 @@ int main(void) {
 
   unsigned char *blockTexture = readBMP("../res/img/main.bmp");
 
-  int *cubes = malloc(256 * 256 * sizeof(int));
+  int *cubes = calloc(RENDER_W * RENDER_W * RENDER_H, sizeof(int));
 
-  for (int i = 0; i < 256 * 256; i++) {
-    int x = i % 256;
-    int z = i / 256;
-    cubes[i] = getCube(x, z, 694200);
+  for (int i = 0; i < RENDER_W * RENDER_W; i++) {
+    int x = i % RENDER_W;
+    int z = i / RENDER_W;
+    int y = getCube(x, z, 694200);
+
+    for (int j = i; j < i + y * RENDER_W * RENDER_W; j += RENDER_W * RENDER_W) {
+      cubes[j] = 1;
+    }
   }
 
   int pointCount = genCubes(vertex_buffer, uv_buffer, cubes);
@@ -108,7 +112,7 @@ int main(void) {
   glClearColor(170 / 256.0, 220 / 256.0, 230 / 256.0, 1.0);
 
   controls controls = {
-      .x = 0, .y = 256, .z = 0, .xv = 0, .yv = 0, .zv = 0, .xr = 0, .yr = 0};
+      .x = 16, .y = 512, .z = 16, .xv = 0, .yv = 0, .zv = 0, .xr = 0, .yr = 0};
 
   glfwSetKeyCallback(window, keyCallback);
 

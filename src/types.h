@@ -17,6 +17,9 @@ struct controls {
   double zv;
   double xr;
   double yr;
+  double ox;
+  double oy;
+  double oz;
 } typedef controls;
 
 #endif

@@ -4,15 +4,32 @@
 #include <GLFW/glfw3.h>
 
 #include "types.h"
+#include "util.h"
 
 int wKey = 0;
 int aKey = 0;
 int sKey = 0;
 int dKey = 0;
 int escKey = 1;
+int spaceKey = 0;
 
 double xOff = 0;
 double yOff = 0;
+
+int getHash(double x, double y, double z, int *cubes) {
+  if (y < 0)
+    return 1;
+
+  int hash = -1;
+  if (x > 0 && x < RENDER_W * 2 && z > 0 && z < RENDER_W * 2 && y > 0 &&
+      y < RENDER_H * 2) {
+    hash = (((int)(z / 2 + 0.5)) * RENDER_W) + ((int)(x / 2 + 0.5));
+    hash = (((int)(y / 2 + 0.5)) * RENDER_W * RENDER_W) + hash;
+  }
+
+  return (hash > -1 && hash < RENDER_W * RENDER_W * RENDER_H) ? cubes[hash]
+                                                              : -1;
+}
 
 void keyCallback(GLFWwindow *window, int key, int scancode, int action,
                  int mods) {
@@ -22,6 +39,7 @@ void keyCallback(GLFWwindow *window, int key, int scancode, int action,
     sKey |= (key == GLFW_KEY_S);
     dKey |= (key == GLFW_KEY_D);
     escKey = (key == GLFW_KEY_ESCAPE) ? !escKey : escKey;
+    spaceKey = (key == GLFW_KEY_SPACE);
   } else if (action == GLFW_RELEASE) {
     wKey &= !(key == GLFW_KEY_W);
     aKey &= !(key == GLFW_KEY_A);
@@ -37,6 +55,10 @@ void keyCallback(GLFWwindow *window, int key, int scancode, int action,
 }
 
 void evalKeys(controls *controls, GLFWwindow *window, int *cubes) {
+  controls->ox = controls->x;
+  controls->oy = controls->y;
+  controls->oz = controls->z;
+
   double xr, yr;
   glfwGetCursorPos(window, &xr, &yr);
 
@@ -65,18 +87,6 @@ void evalKeys(controls *controls, GLFWwindow *window, int *cubes) {
   controls->xv *= 0.9;
   controls->zv *= 0.9;
 
-  int hash = -1;
-  if (controls->x > 0 && controls->x < 512 && controls->z > 0 &&
-      controls->z < 512)
-    hash = (((int)(controls->z / 2 + 0.5)) * 256) + ((int)(controls->x / 2 + 0.5));
-
-  printf("%i\n",((int)(controls->z * 2)));
-
-  if (hash > -1 && hash < 256*256 )
-    hash = cubes[hash] * 2;
-
-  controls->yv -= 0.1;
-
   controls->z +=
       sin(controls->xr) * controls->xv - cos(controls->xr) * controls->zv;
   controls->x +=
@@ -84,9 +94,48 @@ void evalKeys(controls *controls, GLFWwindow *window, int *cubes) {
 
   controls->y += controls->yv;
 
-  if (controls->y < hash) {
-    printf("oh no!\n");
-    controls->y = hash;
-    controls->yv = 0;
+  int collide = 0;
+  int collides[12];
+
+  for (int i = 0; i < 8; i++) {
+    collides[i] = getHash(controls->x + ((i % 2 == 0) ? 1.6 : -1.6),
+                          controls->y + ((i % 4 < 2) ? 0 : 1.6),
+                          controls->z + ((i % 8 < 4) ? 1.6 : -1.6), cubes) > 0;
+    collide |= collides[i];
+  }
+
+  for (int i = 9; i < 12; i++) {
+    collides[i] = getHash(controls->x + ((i % 2 == 0) ? 1.6 : -1.6),
+                          controls->y + (-0.1),
+                          controls->z + ((i % 8 < 4) ? 1.6 : -1.6), cubes) > 0;
+  }
+
+  if (spaceKey && (collides[8] || collides[9] || collides[10] || collides[11])) {
+    controls->yv = 0.2;
+  }
+
+  spaceKey = 0;
+
+  controls->yv -= 0.01;
+  if (!collide)
+    return;
+
+  int cornerX = round(controls->x) != round(controls->ox);
+  int cornerY = round(controls->y) != round(controls->oy);
+  int cornerZ = round(controls->z) != round(controls->oz);
+
+  printf("%f:%f:%f\n", cornerX, cornerY, cornerZ);
+
+  if (cornerX && (collides[2] || collides[3] || collides[6] || collides[7])) {
+    controls->x = controls->ox;
+    controls->xv = 0.0;
+  }
+  if (cornerY || !(collides[2] || collides[3] || collides[6] || collides[7])) {
+    controls->y = controls->oy;
+    controls->yv = 0.0;
+  }
+  if (cornerZ && (collides[2] || collides[3] || collides[6] || collides[7])) {
+    controls->z = controls->oz;
+    controls->zv = 0.0;
   }
 }

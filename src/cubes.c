@@ -14,23 +14,20 @@ int genCubes(GLuint vertex_buffer, GLuint uv_buffer, int* cubes) {
   float *uvPoints = malloc(1024 * 1024 * 1024);
   int pointCount = 0;
   
-  for (int i = 0; i < 256 * 256; i++) {
-    int x = i % 256;
-    int z = i / 256;
-    int y = cubes[i];
+  for (int i = 0; i < RENDER_W * RENDER_W * RENDER_H; i++) {
+    int x = i % RENDER_W;
+    int z = (i / RENDER_W) % RENDER_W;
+    int y = i / (RENDER_W*RENDER_W);
 
-    int yd = (z < 0) ? 0 : cubes[i-256];
-    int yd2 = (z > 255) ? 0 : cubes[i+256];
+    int yd = (z < 0) ? 0 : cubes[i-RENDER_W];
+    int yd2 = (z > RENDER_W-1) ? 0 : cubes[i+RENDER_W];
     int yd3 = (x < 0) ? 0 : cubes[i-1];
-    int yd4 = (x > 255) ? 0 : cubes[i+1];
+    int yd4 = (x > RENDER_W-1) ? 0 : cubes[i+1];
+    int yd5 = (y < 0) ? 0 : cubes[i-RENDER_W*RENDER_W];
+    int yd6 = (y > RENDER_H-1) ? 0 : cubes[i+RENDER_W*RENDER_W];
 
-    yd = (yd2 < yd) ? yd2 : yd;
-    yd = (yd3 < yd) ? yd3 : yd;
-    yd = (yd4 < yd) ? yd4 : yd;
-    yd = (y < yd) ? y : yd;
-
-    for (int i = yd-1; i < y; i++) {
-      model cubeModel = getModel(fileContent, 6, 1, 0, 0, x * 2, i * 2, z * 2);
+    if (cubes[i] && (!yd || !yd2 || !yd3 || !yd4 || !yd5 || !yd6)) {
+      model cubeModel = getModel(fileContent, 6, 1, 0, 2, x * 2, y * 2, z * 2);
 
       memcpy(&points[pointCount * 3], cubeModel.points,
              cubeModel.pointCount * 3 * sizeof(float));
