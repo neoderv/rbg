@@ -27,7 +27,7 @@ int genCubes(GLuint vertex_buffer, GLuint uv_buffer, int* cubes) {
     int yd6 = (y > RENDER_H-1) ? 0 : cubes[i+RENDER_W*RENDER_W];
 
     if (cubes[i] && (!yd || !yd2 || !yd3 || !yd4 || !yd5 || !yd6)) {
-      model cubeModel = getModel(fileContent, 6, 1, 0, 2, x * 2, y * 2, z * 2);
+      model cubeModel = getModel(fileContent, 6, 1, 0, cubes[i], x * 2, y * 2, z * 2);
 
       memcpy(&points[pointCount * 3], cubeModel.points,
              cubeModel.pointCount * 3 * sizeof(float));

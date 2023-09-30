@@ -92,9 +92,10 @@ int main(void) {
     int z = i / RENDER_W;
     int y = getCube(x, z, 694200);
 
-    for (int j = i; j < i + y * RENDER_W * RENDER_W; j += RENDER_W * RENDER_W) {
-      cubes[j] = 1;
+    for (int j = i; j < i + (y-1) * RENDER_W * RENDER_W ; j += RENDER_W * RENDER_W) {
+      cubes[j] = 3;
     }
+    cubes[i + (y-1) * RENDER_W * RENDER_W] = 2;
   }
 
   int pointCount = genCubes(vertex_buffer, uv_buffer, cubes);
