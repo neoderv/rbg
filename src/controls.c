@@ -31,6 +31,17 @@ int getHash(double x, double y, double z, int *cubes) {
                                                               : -1;
 }
 
+int getCollide(int *collides, double x, double y, double z, int *cubes) {
+  int collide = 0;
+  for (int i = 0; i < 8; i++) {
+    collides[i] =
+        getHash(x + ((i % 2 == 0) ? 1.6 : -1.6), y + ((i % 4 < 2) ? 0 : 1.6),
+                z + ((i % 8 < 4) ? 1.6 : -1.6), cubes) > 0;
+    collide |= collides[i];
+  }
+  return collide;
+}
+
 void keyCallback(GLFWwindow *window, int key, int scancode, int action,
                  int mods) {
   if (action == GLFW_PRESS) {
@@ -94,48 +105,50 @@ void evalKeys(controls *controls, GLFWwindow *window, int *cubes) {
 
   controls->y += controls->yv;
 
-  int collide = 0;
-  int collides[12];
+  int collides[8];
 
-  for (int i = 0; i < 8; i++) {
-    collides[i] = getHash(controls->x + ((i % 2 == 0) ? 1.6 : -1.6),
-                          controls->y + ((i % 4 < 2) ? 0 : 1.6),
-                          controls->z + ((i % 8 < 4) ? 1.6 : -1.6), cubes) > 0;
-    collide |= collides[i];
-  }
-
-  for (int i = 9; i < 12; i++) {
-    collides[i] = getHash(controls->x + ((i % 2 == 0) ? 1.6 : -1.6),
-                          controls->y + (-0.1),
-                          controls->z + ((i % 8 < 4) ? 1.6 : -1.6), cubes) > 0;
-  }
-
-  if (spaceKey && (collides[8] || collides[9] || collides[10] || collides[11])) {
-    controls->yv = 0.2;
-  }
-
-  spaceKey = 0;
+  int collide =
+      getCollide(collides, controls->x, controls->y, controls->z, cubes);
 
   controls->yv -= 0.01;
-  if (!collide)
+  if (!collide) {
+    spaceKey = 0;
     return;
+  }
 
   int cornerX = round(controls->x) != round(controls->ox);
   int cornerY = round(controls->y) != round(controls->oy);
   int cornerZ = round(controls->z) != round(controls->oz);
 
-  printf("%f:%f:%f\n", cornerX, cornerY, cornerZ);
+  if (cornerY) {
+    double curr = controls->y;
+    controls->y = controls->oy;
+    controls->oy = curr;
+    controls->yv = 0.0;
 
-  if (cornerX && (collides[2] || collides[3] || collides[6] || collides[7])) {
+    collide =
+        getCollide(collides, controls->x, controls->y, controls->z, cubes);
+  }
+
+  int collide2 = collides[2] || collides[3] || collides[6] || collides[7];
+
+  if ((collides[0] || collides[1] || collides[4] || collides[5]) && spaceKey) {
+    controls->yv = 0.25;
+  }
+
+  if (cornerX && collide2) {
     controls->x = controls->ox;
     controls->xv = 0.0;
+    collide =
+        getCollide(collides, controls->x, controls->y, controls->z, cubes);
   }
-  if (cornerY || !(collides[2] || collides[3] || collides[6] || collides[7])) {
-    controls->y = controls->oy;
-    controls->yv = 0.0;
-  }
-  if (cornerZ && (collides[2] || collides[3] || collides[6] || collides[7])) {
+
+  collide2 = collides[2] || collides[3] || collides[6] || collides[7];
+
+  if (cornerZ && collide2) {
     controls->z = controls->oz;
     controls->zv = 0.0;
   }
+
+  spaceKey = 0;
 }
